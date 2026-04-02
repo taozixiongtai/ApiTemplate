@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTemplate.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class ServiceTestController : ControllerBase
