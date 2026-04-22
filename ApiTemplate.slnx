@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="ApiTemplate.Application/ApiTemplate.Application.csproj" Id="7db43245-89d1-4c0f-94ae-d7633ee90527" />
+  <Project Path="ApiTemplate.Domain/ApiTemplate.Domain.csproj" Id="5634caab-7ba0-452b-93fb-34fb46459e07" />
+  <Project Path="ApiTemplate.Infrastructure/ApiTemplate.Infrastructure.csproj" Id="11a384f7-b9dd-4195-a88a-bd4b1059edbc" />
   <Project Path="ApiTemplate/ApiTemplate.csproj" />
 </Solution>
