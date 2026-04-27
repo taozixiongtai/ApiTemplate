@@ -13,6 +13,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiTemplate.Application\ApiTemplate.Application.csproj" />
+    <ProjectReference Include="..\ApiTemplate.SourceGenerators\ApiTemplate.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <PropertyGroup>
+  </PropertyGroup>
 
 </Project>
