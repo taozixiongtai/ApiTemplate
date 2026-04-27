@@ -1,6 +1,5 @@
-﻿using ApiTemplate.Exceptions;
+using ApiTemplate.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 namespace ApiTemplate.Controllers;
 

@@ -1,22 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ApiTemplate.Application.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTemplate.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ServiceTestController : ControllerBase
+public class ServiceTestController(ITestService testService) : ControllerBase
 {
-    private readonly ITestService _testService;
-    public ServiceTestController(ITestService testService)
-    {
-        _testService = testService;
-    }
 
     [HttpGet("message")]
     public IActionResult GetMessage()
     {
-        var message = _testService.GetMessage();
+        var message = testService.GetMessage();
         return Ok(new { Message = message });
     }
 }

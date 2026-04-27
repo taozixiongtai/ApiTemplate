@@ -1,13 +1,4 @@
-﻿using ApiTemplate.ServiceRegister;
-
-namespace ApiTemplate.ServiceRegister;
-
-public enum ServiceLifetimeType
-{
-    Singleton,
-    Scoped,
-    Transient
-}
+﻿namespace ApiTemplate.Infrastructure.IOC;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class RegisterServiceAttribute(ServiceLifetimeType lifetime) : Attribute

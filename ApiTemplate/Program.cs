@@ -1,17 +1,31 @@
+using ApiTemplate.Infrastructure.Exceptions;
+using ApiTemplate.Infrastructure.IOC;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
+builder.Services.AddAutoRegisteredServices();
+
+// 注册全局异常处理器
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddControllers();
+
+
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 启用异常处理中间件（一定要放在最前面捕获全局异常）
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -19,5 +33,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

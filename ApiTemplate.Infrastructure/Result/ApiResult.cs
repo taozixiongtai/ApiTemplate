@@ -1,5 +1,4 @@
-﻿namespace ApiTemplate.Result;
-
+namespace ApiTemplate.Infrastructure.Result;
 
 public class ApiResult
 {
@@ -10,8 +9,6 @@ public class ApiResult
     public static ApiResult Success(object? data = null) =>
         new() { State = true, Data = data };
 
-
     public static ApiResult Fail(string message) =>
         new() { State = false, Message = message };
-
 }
