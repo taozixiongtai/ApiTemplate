@@ -24,25 +24,38 @@ public static class ServiceCollectionExtensions
             if (attr == null) continue;
 
             var interfaces = type.GetInterfaces();
-            if (interfaces.Length == 0) continue;
-
-            foreach (var iface in interfaces)
+            
+            if (interfaces.Length == 0)
             {
-                switch (attr.Lifetime)
+                // 如果没有实现任何接口，则将自己注册为服务类型
+                RegisterType(services, type, type, attr.Lifetime);
+            }
+            else
+            {
+                // 如果实现了接口，则遍历接口进行注册
+                foreach (var iface in interfaces)
                 {
-                    case ServiceLifetimeType.Singleton:
-                        services.AddSingleton(iface, type);
-                        break;
-                    case ServiceLifetimeType.Scoped:
-                        services.AddScoped(iface, type);
-                        break;
-                    case ServiceLifetimeType.Transient:
-                        services.AddTransient(iface, type);
-                        break;
+                    RegisterType(services, iface, type, attr.Lifetime);
                 }
             }
         }
 
         return services;
+    }
+
+    private static void RegisterType(IServiceCollection services, Type serviceType, Type implementationType, ServiceLifetimeType lifetime)
+    {
+        switch (lifetime)
+        {
+            case ServiceLifetimeType.Singleton:
+                services.AddSingleton(serviceType, implementationType);
+                break;
+            case ServiceLifetimeType.Scoped:
+                services.AddScoped(serviceType, implementationType);
+                break;
+            case ServiceLifetimeType.Transient:
+                services.AddTransient(serviceType, implementationType);
+                break;
+        }
     }
 }

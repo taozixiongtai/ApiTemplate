@@ -3,9 +3,11 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using ApiTemplate.Infrastructure.IOC;
 
 namespace ApiTemplate.Infrastructure.JWT;
 
+[RegisterService(ServiceLifetimeType.Singleton)]
 public class JwtHelper
 {
     private readonly IConfiguration _configuration;

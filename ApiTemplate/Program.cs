@@ -32,9 +32,6 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
-    // 注册 JWT 辅助类
-    builder.Services.AddSingleton<JwtHelper>();
-
     // 注册 JWT 认证服务
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
