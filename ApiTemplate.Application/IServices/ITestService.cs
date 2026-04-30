@@ -1,4 +1,4 @@
-﻿using ApiTemplate.Infrastructure.DynamicApi;
+using ApiTemplate.Infrastructure.DynamicApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,4 +25,8 @@ public interface ITestService
 
     [ApiAction("GET", "message")]
     string GetMessage();
+
+    [ApiAction("POST", "login")]
+    [AllowAnonymous]
+    string Login([FromQuery] string password);
 }

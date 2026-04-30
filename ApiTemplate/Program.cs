@@ -1,5 +1,9 @@
+using System.Text;
 using ApiTemplate.Infrastructure.Exceptions;
 using ApiTemplate.Infrastructure.IOC;
+using ApiTemplate.Infrastructure.JWT;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 
@@ -28,6 +32,25 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
+    // 注册 JWT 辅助类
+    builder.Services.AddSingleton<JwtHelper>();
+
+    // 注册 JWT 认证服务
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? ""))
+            };
+        });
+
     builder.Services.AddControllers();
 
 
@@ -46,6 +69,8 @@ try
 
     app.UseHttpsRedirection();
 
+    // 注意：UseAuthentication 必须在 UseAuthorization 之前
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
