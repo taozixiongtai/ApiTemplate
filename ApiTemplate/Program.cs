@@ -32,6 +32,17 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
+    // 注册 CORS 策略（宽松模式）
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+    });
+
     // 注册 JWT 认证服务
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -65,6 +76,9 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    // 启用 CORS（必须在 UseRouting 之后，UseAuthorization 之前）
+    app.UseCors("AllowAll");
 
     // 注意：UseAuthentication 必须在 UseAuthorization 之前
     app.UseAuthentication();
