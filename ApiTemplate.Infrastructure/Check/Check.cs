@@ -1,6 +1,7 @@
 using ApiTemplate.Infrastructure.Exceptions;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace ApiTemplate.Infrastructure.Check;
@@ -10,6 +11,16 @@ namespace ApiTemplate.Infrastructure.Check;
 /// </summary>
 public static class Check
 {
+    /// <summary>
+    /// 直接抛出业务异常
+    /// </summary>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void Error(string message)
+    {
+        throw new ApiException(message);
+    }
+
     /// <summary>
     /// 检查对象是否为空，为空则抛出 ApiException
     /// </summary>
@@ -107,5 +118,5 @@ public static class Check
             throw new ApiException(message);
         }
     }
-  
+
 }
