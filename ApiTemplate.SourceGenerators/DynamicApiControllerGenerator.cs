@@ -75,6 +75,7 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
         sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine("using Microsoft.AspNetCore.Mvc;");
         sb.AppendLine("using Microsoft.AspNetCore.Authorization;");
+        sb.AppendLine("using ApiTemplate.Infrastructure.Result;");
         sb.AppendLine($"using {ifaceSymbol.ContainingNamespace.ToDisplayString()};");
         sb.AppendLine();
         sb.AppendLine("namespace ApiTemplate.Controllers.Generated");
@@ -137,10 +138,8 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
         string asyncKeyword = isAsync ? "async " : "";
         string awaitKeyword = isAsync ? "await " : "";
 
-        // Action 返回类型：void/Task → IActionResult / Task<IActionResult>，其他保持
-        string actionReturn = isVoidTask
-            ? (isAsync ? "Task<IActionResult>" : "IActionResult")
-            : returnType;            // e.g. Task<UserDto> or string
+        // Action 返回类型：统一返回 ApiResult 或 Task<ApiResult>
+        string actionReturn = isAsync ? "Task<ApiResult>" : "ApiResult";
 
         // 方法名去掉 Async 后缀作为 Action 名
         string actionName = method.Name.EndsWith("Async")
@@ -170,11 +169,19 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
         if (isVoidTask)
         {
             sb.AppendLine($"            {callExpr};");
-            sb.AppendLine("            return Ok();");
+            sb.AppendLine("            return ApiResult.Success();");
         }
         else
         {
-            sb.AppendLine($"            return {callExpr};");  // 直接 return，保留类型
+            if (isAsync)
+            {
+                sb.AppendLine($"            var result = {callExpr};");
+                sb.AppendLine("            return ApiResult.Success(result);");
+            }
+            else
+            {
+                sb.AppendLine($"            return ApiResult.Success({callExpr});");
+            }
         }
 
         sb.AppendLine("        }");

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using ApiTemplate.Infrastructure.DynamicApi;
+﻿using ApiTemplate.Infrastructure.DynamicApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
