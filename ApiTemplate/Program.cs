@@ -3,6 +3,7 @@ using ApiTemplate.Application.Services;
 using ApiTemplate.Infrastructure.Exceptions;
 using ApiTemplate.Infrastructure.IOC;
 using ApiTemplate.Infrastructure.Orm;
+using ApiTemplate.Init;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -70,12 +71,8 @@ try
 
     var app = builder.Build();
 
-    // 自动初始化数据库表结构 (CodeFirst)
-    using (var scope = app.Services.CreateScope())
-    {
-        var sqlSugar = scope.ServiceProvider.GetRequiredService<SqlSugar.ISqlSugarClient>();
-        sqlSugar.CodeFirst.InitTables(typeof(ApiTemplate.Domain.Models.User));
-    }
+    // 自动初始化数据库和表结构
+    app.InitializeDatabase();
 
     // 启用异常处理中间件（一定要放在最前面捕获全局异常）
     app.UseExceptionHandler();
