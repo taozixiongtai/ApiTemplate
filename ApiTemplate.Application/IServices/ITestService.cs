@@ -1,4 +1,3 @@
-using ApiTemplate.Application.Dto;
 using ApiTemplate.Infrastructure.DynamicApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +9,6 @@ public interface ITestService
 {
     [ApiAction("GET", "{id:int}")]
     Task<string> GetByIdAsync(int id);
-
-    [ApiAction("POST", "create")]
-    Task<int> CreateAsync([FromBody] CreateUserRequest req);
 
     [ApiAction("DELETE", "{id:int}")]
     [AllowAnonymous]

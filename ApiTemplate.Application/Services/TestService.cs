@@ -20,13 +20,6 @@ public class TestService : ITestService
         return Task.FromResult($"获取到用户: {id}");
     }
 
-    public Task<int> CreateAsync(CreateUserRequest req)
-    {
-        // 模拟创建用户并返回ID
-        int newId = new Random().Next(100, 1000);
-        return Task.FromResult(newId);
-    }
-
     public Task DeleteAsync(int id)
     {
         // 模拟删除
