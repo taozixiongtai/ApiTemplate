@@ -1,7 +1,10 @@
 using System.Text;
+using ApiTemplate.Application.IServices;
+using ApiTemplate.Application.Services;
 using ApiTemplate.Infrastructure.Exceptions;
 using ApiTemplate.Infrastructure.IOC;
 using ApiTemplate.Infrastructure.JWT;
+using ApiTemplate.Infrastructure.Orm;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -26,6 +29,8 @@ try
 
     builder.Services.AddControllers();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddSqlSugar(builder.Configuration);
+    builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
     builder.Services.AddAutoRegisteredServices();
 
     // 注册全局异常处理器
