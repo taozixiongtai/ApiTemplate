@@ -1,14 +1,13 @@
-using System.Text;
 using ApiTemplate.Application.IServices;
 using ApiTemplate.Application.Services;
 using ApiTemplate.Infrastructure.Exceptions;
 using ApiTemplate.Infrastructure.IOC;
-using ApiTemplate.Infrastructure.JWT;
 using ApiTemplate.Infrastructure.Orm;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 // 1. 初始化两阶段 Serilog 引导日志（为了在宿主启动失败时也能捕获异常）
 Log.Logger = new LoggerConfiguration()
@@ -37,7 +36,7 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
-    // 注册 CORS 策略（宽松模式）
+    // 注册 CORS 策略 
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowAll", builder =>
@@ -71,6 +70,13 @@ try
 
     var app = builder.Build();
 
+    // 自动初始化数据库表结构 (CodeFirst)
+    using (var scope = app.Services.CreateScope())
+    {
+        var sqlSugar = scope.ServiceProvider.GetRequiredService<SqlSugar.ISqlSugarClient>();
+        sqlSugar.CodeFirst.InitTables(typeof(ApiTemplate.Domain.Models.User));
+    }
+
     // 启用异常处理中间件（一定要放在最前面捕获全局异常）
     app.UseExceptionHandler();
 
@@ -96,7 +102,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, "应用启动失败");
 }
 finally
 {

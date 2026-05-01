@@ -1,5 +1,4 @@
-using System;
-using System.Threading.Tasks;
+using ApiTemplate.Application.Dto;
 using ApiTemplate.Application.IServices;
 using ApiTemplate.Infrastructure.IOC;
 using ApiTemplate.Infrastructure.JWT;
@@ -45,7 +44,7 @@ public class TestService : ITestService
         {
             return _jwtHelper.GenerateToken("admin");
         }
-        
+
         throw new Infrastructure.Exceptions.ApiException("密码错误");
     }
 }

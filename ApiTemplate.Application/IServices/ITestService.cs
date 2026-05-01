@@ -1,14 +1,9 @@
+using ApiTemplate.Application.Dto;
 using ApiTemplate.Infrastructure.DynamicApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTemplate.Application.IServices;
-
-public class CreateUserRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public int Age { get; set; }
-}
 
 [DynamicApi("api/test-service")] // 测试自定义路由
 public interface ITestService
