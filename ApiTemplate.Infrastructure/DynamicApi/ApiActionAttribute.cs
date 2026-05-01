@@ -1,14 +1,16 @@
+using ApiTemplate.Infrastructure.Enum;
+
 namespace ApiTemplate.Infrastructure.DynamicApi;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class ApiActionAttribute : Attribute
 {
-    public string HttpMethod { get; }
+    public HttpMethodType HttpMethod { get; }
     public string Route { get; }
 
-    public ApiActionAttribute(string httpMethod, string route = "")
+    public ApiActionAttribute(string route = "", HttpMethodType httpMethod = HttpMethodType.POST)
     {
-        HttpMethod = httpMethod;  // "GET" "POST" "PUT" "DELETE" "PATCH"
+        HttpMethod = httpMethod;
         Route = route;
     }
 }

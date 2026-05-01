@@ -8,7 +8,7 @@ namespace ApiTemplate.Application.IServices;
 [DynamicApi("api/user")]
 public interface IUserService
 {
-    [ApiAction("POST", "login")]
+    [ApiAction("login")]
     [AllowAnonymous]
     Task<string> LoginAsync([FromBody] LoginRequest req);
 }

@@ -105,12 +105,53 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
 
     private static void GenerateAction(StringBuilder sb, IMethodSymbol method)
     {
-        // 1. 读 [ApiAction(httpMethod, route)]
+        // 1. 读 [ApiAction(route, httpMethod)]
         var actionAttr = method.GetAttributes()
             .First(a => a.AttributeClass?.Name.Contains("ApiAction") == true);
 
-        string httpMethod = actionAttr.ConstructorArguments[0].Value?.ToString() ?? "POST";
-        string route = actionAttr.ConstructorArguments[1].Value?.ToString() ?? "";
+        // 获取 HttpMethodType 的枚举名称，例如 "POST" 或 "GET"
+        // 构造函数第二个参数是 HttpMethodType 枚举，如果没有提供则取默认值
+        string httpMethod = "POST"; // 默认值
+        if (actionAttr.ConstructorArguments.Length > 1)
+        {
+            var enumValue = actionAttr.ConstructorArguments[1].Value;
+            if (enumValue is int enumInt)
+            {
+                // HttpMethodType: 0=POST, 1=GET, 2=PUT, 3=DELETE, 4=PATCH
+                httpMethod = enumInt switch
+                {
+                    0 => "POST",
+                    1 => "GET",
+                    2 => "PUT",
+                    3 => "DELETE",
+                    4 => "PATCH",
+                    _ => "POST"
+                };
+            }
+        }
+        else if (actionAttr.NamedArguments.Any(n => n.Key == "HttpMethod"))
+        {
+            var enumValue = actionAttr.NamedArguments.First(n => n.Key == "HttpMethod").Value.Value;
+            if (enumValue is int enumInt)
+            {
+                httpMethod = enumInt switch
+                {
+                    0 => "POST",
+                    1 => "GET",
+                    2 => "PUT",
+                    3 => "DELETE",
+                    4 => "PATCH",
+                    _ => "POST"
+                };
+            }
+        }
+
+        // 第一个参数现在是 Route
+        string route = "";
+        if (actionAttr.ConstructorArguments.Length > 0 && actionAttr.ConstructorArguments[0].Value is string routeVal)
+        {
+            route = routeVal;
+        }
 
         // 2. 透传其他 Attribute（排除 ApiAction 本身）
         //    只透传白名单内的，避免透传编译器/语言层面的 Attribute

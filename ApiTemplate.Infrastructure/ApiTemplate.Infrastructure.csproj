@@ -13,6 +13,7 @@
   <ItemGroup>
     <Folder Include="Check\" />
     <Folder Include="Orm\" />
+    <Folder Include="Enum\" />
   </ItemGroup>
 
   <ItemGroup>
