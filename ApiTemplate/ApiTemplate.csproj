@@ -19,6 +19,10 @@
     <ProjectReference Include="..\ApiTemplate.SourceGenerators\ApiTemplate.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
   <PropertyGroup>
   </PropertyGroup>
 
