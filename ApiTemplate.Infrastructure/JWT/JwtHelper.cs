@@ -8,22 +8,15 @@ using ApiTemplate.Infrastructure.IOC;
 namespace ApiTemplate.Infrastructure.JWT;
 
 [RegisterService(ServiceLifetimeType.Singleton)]
-public class JwtHelper
+public class JwtHelper(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public JwtHelper(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public string GenerateToken(string username)
     {
         // 1. 获取配置
-        var secretKey = _configuration["Jwt:SecretKey"] ?? "default_super_secret_key_needs_to_be_long_enough";
-        var issuer = _configuration["Jwt:Issuer"] ?? "ApiTemplate";
-        var audience = _configuration["Jwt:Audience"] ?? "ApiTemplateClient";
-        var expireMinutes = int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "1440");
+        var secretKey = configuration["Jwt:SecretKey"] ?? "default_super_secret_key_needs_to_be_long_enough";
+        var issuer = configuration["Jwt:Issuer"] ?? "ApiTemplate";
+        var audience = configuration["Jwt:Audience"] ?? "ApiTemplateClient";
+        var expireMinutes = int.Parse(configuration["Jwt:ExpireMinutes"] ?? "1440");
 
         // 2. 创建凭证
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));

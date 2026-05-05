@@ -174,8 +174,10 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
 
         // 4. 返回类型处理：保留原始返回类型（保留 Swagger 可见性）
         string returnType = method.ReturnType.ToDisplayString();
-        bool isVoidTask = returnType == "System.Threading.Tasks.Task" || returnType == "void";
-        bool isAsync = returnType.StartsWith("System.Threading.Tasks.Task") || returnType == "System.Threading.Tasks.Task";
+        
+        bool isVoidTask = returnType == "System.Threading.Tasks.Task" || returnType == "System.Threading.Tasks.ValueTask" || returnType == "void";
+        bool isAsync = returnType.StartsWith("System.Threading.Tasks.Task") || returnType.StartsWith("System.Threading.Tasks.ValueTask");
+        
         string asyncKeyword = isAsync ? "async " : "";
         string awaitKeyword = isAsync ? "await " : "";
 

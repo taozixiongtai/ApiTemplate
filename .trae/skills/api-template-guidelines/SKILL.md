@@ -97,3 +97,53 @@ public async Task<string> LoginAsync(LoginRequest req)
     return "jwt_token";
 }
 ```
+
+## 4. 文件范围的命名空间 (File-scoped Namespaces)
+
+**所有的 C# 代码文件都必须使用文件范围的命名空间**。
+
+不要使用传统的带大括号的命名空间。这样可以减少一层代码缩进，让代码更整洁。
+
+### 使用示例：
+```csharp
+// 正确：文件范围命名空间（结尾带分号，没有大括号）
+namespace ApiTemplate.Application.Services;
+
+public class MyService 
+{
+}
+
+// 错误：传统命名空间
+// namespace ApiTemplate.Application.Services
+// {
+//     public class MyService 
+//     {
+//     }
+// }
+```
+
+## 5. 依赖注入使用主构造函数 (Primary Constructors for DI)
+
+**类中的依赖注入必须使用主构造函数，且不要再显式声明私有只读字段**。
+
+直接在类名后面声明注入的依赖项，在类的方法中直接使用该变量，不需要显式声明 `private readonly IXXX _xxx;` 和编写构造函数赋值代码。
+
+### 使用示例：
+```csharp
+using ApiTemplate.Application.IServices;
+using ApiTemplate.Infrastructure.IOC;
+
+namespace ApiTemplate.Application.Services;
+
+[RegisterService(ServiceLifetimeType.Scoped)]
+// 正确：使用主构造函数注入 userRepo 和 jwtHelper
+public class UserService(IBaseRepository<User> userRepo, JwtHelper jwtHelper) : IUserService
+{
+    public async Task<string> LoginAsync(LoginRequest req)
+    {
+        // 直接使用主构造函数中的 userRepo 和 jwtHelper 变量
+        var user = await userRepo.GetFirstAsync(u => u.Username == req.Username);
+        return jwtHelper.GenerateToken(user.Username);
+    }
+}
+```
