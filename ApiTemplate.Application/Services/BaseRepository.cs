@@ -40,7 +40,6 @@ public class BaseRepository<T>(ISqlSugarClient db) : IBaseRepository<T> where T 
     }
 
 
-
     /// <summary>
     /// 根据主键获取实体
     /// </summary>

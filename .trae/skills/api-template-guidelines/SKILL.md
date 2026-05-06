@@ -169,3 +169,49 @@ public async Task DeleteArticleAsync(int id)
     tran.CommitTran();
 }
 ```
+
+## 7. 对象映射 (Object Mapping)
+
+**不要手动编写转换方法，也不要在业务代码中直接调用 `.Adapt<T>()`**。
+
+框架集成了 `Mapster` 及 `MapsterExtensions.Generator`。请在 `Mapper` 文件夹中定义带有 `[Mapper]` 特性的接口，由源代码生成器在编译时自动生成对应的扩展方法。在 Service 中直接调用这些生成的扩展方法（如 `.MapToDto()` 或 `.ProjectToDto()`）。
+
+### 使用示例：
+
+1. 在 `Mapper` 目录中定义接口：
+```csharp
+using ApiTemplate.Application.Dto;
+using ApiTemplate.Domain.Models;
+using Mapster;
+
+namespace ApiTemplate.Application.Mapper;
+
+[Mapper]
+public interface IApplicationMapper
+{
+    CategoryDto MapToDto(Category category);
+    List<CategoryDto> ProjectToDto(List<Category> categories);
+}
+```
+
+2. 在业务服务中使用生成的扩展方法：
+```csharp
+using ApiTemplate.Application.Mapper; // 引入生成的扩展方法所在的命名空间
+
+public async Task<CategoryDto> GetCategoryByIdAsync(int id)
+{
+    var category = await categoryRepository.GetByIdAsync(id);
+    Check.NotNull(category, "分类不存在");
+    
+    // 使用生成的扩展方法
+    return category.MapToDto();
+}
+
+public async Task<List<CategoryDto>> GetAllCategoriesAsync()
+{
+    var categories = await categoryRepository.GetListAsync();
+    
+    // 集合类型也可以调用对应的扩展方法
+    return categories.ProjectToDto();
+}
+```

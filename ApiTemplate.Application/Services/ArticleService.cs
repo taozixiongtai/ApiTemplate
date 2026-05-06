@@ -1,8 +1,10 @@
 using ApiTemplate.Application.Dto;
 using ApiTemplate.Application.IServices;
+using ApiTemplate.Application.Mapper;
 using ApiTemplate.Domain.Dto;
 using ApiTemplate.Domain.Models;
 using ApiTemplate.Infrastructure.IOC;
+using Mapster;
 using SqlSugar;
 using Check = ApiTemplate.Infrastructure.Check.Check;
 
@@ -51,7 +53,7 @@ public class ArticleService(
 
         return new PagedResult<ArticleDto>
         {
-            Items = list.Select(MapToDto).ToList(),
+            Items = list.ProjectToDto(),
             TotalCount = totalCount,
             Page = request.Page,
             PageSize = request.PageSize
@@ -71,7 +73,7 @@ public class ArticleService(
 
         Check.NotNull(article, "文章不存在");
 
-        return MapToDto(article);
+        return article.MapToDto();
     }
 
     /// <summary>
@@ -153,24 +155,5 @@ public class ArticleService(
         await relationRepository.DeleteAsync(x => x.ArticleId == id);
 
         tran.CommitTran();
-    }
-
-    private static ArticleDto MapToDto(Article article)
-    {
-        return new ArticleDto
-        {
-            Id = article.Id,
-            Title = article.Title,
-            Content = article.Content,
-            CreatedAt = article.CreatedAt,
-            UpdatedAt = article.UpdatedAt,
-            Categories = article.Categories?.Select(c => new CategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                CreatedAt = c.CreatedAt,
-                UpdatedAt = c.UpdatedAt
-            }).ToList() ?? new List<CategoryDto>()
-        };
     }
 }

@@ -1,8 +1,10 @@
 using ApiTemplate.Application.Dto;
 using ApiTemplate.Application.IServices;
+using ApiTemplate.Application.Mapper;
 using ApiTemplate.Domain.Models;
 using ApiTemplate.Infrastructure.Check;
 using ApiTemplate.Infrastructure.IOC;
+using Mapster;
 using SqlSugar;
 using Check = ApiTemplate.Infrastructure.Check.Check;
 
@@ -24,7 +26,7 @@ public class CategoryService(
     public async Task<List<CategoryDto>> GetAllCategoriesAsync()
     {
         var categories = await categoryRepository.GetListAsync();
-        return categories.Select(MapToDto).ToList();
+        return categories.ProjectToDto();
     }
 
     /// <summary>
@@ -36,7 +38,7 @@ public class CategoryService(
     {
         var category = await categoryRepository.GetByIdAsync(id);
         Check.NotNull(category, "分类不存在");
-        return MapToDto(category);
+        return category.MapToDto();
     }
 
     /// <summary>
@@ -88,16 +90,5 @@ public class CategoryService(
         await relationRepository.DeleteAsync(x => x.CategoryId == id);
             
         tran.CommitTran();
-    }
-
-    private static CategoryDto MapToDto(Category category)
-    {
-        return new CategoryDto
-        {
-            Id = category.Id,
-            Name = category.Name,
-            CreatedAt = category.CreatedAt,
-            UpdatedAt = category.UpdatedAt
-        };
     }
 }
