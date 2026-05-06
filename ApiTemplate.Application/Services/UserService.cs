@@ -22,9 +22,6 @@ public class UserService(IBaseRepository<User> userRepo, JwtHelper jwtHelper) : 
     /// <returns>JWT Token 字符串</returns>
     public async Task<string> LoginAsync(LoginRequest req)
     {
-        Check.NotEmpty(req.Username, "用户名不能为空");
-        Check.NotEmpty(req.Password, "密码不能为空");
-
         //  根据用户名和密码查询
         var user = await userRepo.GetFirstAsync(u => u.Username == req.Username && u.Password == req.Password);
         Check.NotNull(user, "用户名或密码错误");

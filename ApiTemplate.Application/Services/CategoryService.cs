@@ -46,9 +46,6 @@ public class CategoryService(
     /// <returns>创建后的分类信息</returns>
     public async Task<CategoryDto> CreateCategoryAsync(CategoryRequest dto)
     {
-        Check.NotEmpty(dto.Name, "分类名称不能为空");
-        Check.IsTrue(dto.Name.Length <= 200, "分类名称不能超过200个字符");
-
         var category = new Category
         {
             Name = dto.Name,
@@ -67,9 +64,6 @@ public class CategoryService(
     /// <param name="dto">分类更新请求对象</param>
     public async Task UpdateCategoryAsync(int id, CategoryRequest dto)
     {
-        Check.IsTrue(id > 0, "无效的分类ID");
-        Check.NotEmpty(dto.Name, "分类名称不能为空");
-        Check.IsTrue(dto.Name.Length <= 200, "分类名称不能超过200个字符");
 
         var category = await categoryRepository.GetByIdAsync(id);
         Check.NotNull(category, "分类不存在或更新失败");
@@ -86,7 +80,6 @@ public class CategoryService(
     /// <param name="id">分类ID</param>
     public async Task DeleteCategoryAsync(int id)
     {
-        Check.IsTrue(id > 0, "无效的分类ID");
 
         using var tran = db.AsTenant().UseTran();
         var result = await categoryRepository.DeleteByIdAsync(id);

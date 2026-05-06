@@ -81,10 +81,6 @@ public class ArticleService(
     /// <returns>创建后的文章信息</returns>
     public async Task<ArticleDto> CreateArticleAsync(ArticleRequest dto)
     {
-        Check.NotEmpty(dto.Title, "文章标题不能为空");
-        Check.IsTrue(dto.Title.Length <= 200, "文章标题不能超过200个字符");
-        Check.NotEmpty(dto.Content, "文章内容不能为空");
-
         var article = new Article
         {
             Title = dto.Title,
@@ -118,10 +114,6 @@ public class ArticleService(
     /// <param name="dto">文章更新请求对象</param>
     public async Task UpdateArticleAsync(int id, ArticleRequest dto)
     {
-        Check.IsTrue(id > 0, "无效的文章ID");
-        Check.NotEmpty(dto.Title, "文章标题不能为空");
-        Check.IsTrue(dto.Title.Length <= 200, "文章标题不能超过200个字符");
-        Check.NotEmpty(dto.Content, "文章内容不能为空");
 
         using var tran = db.AsTenant().UseTran();
         var article = await articleRepository.GetByIdAsync(id);
@@ -153,7 +145,6 @@ public class ArticleService(
     /// <param name="id">文章ID</param>
     public async Task DeleteArticleAsync(int id)
     {
-        Check.IsTrue(id > 0, "无效的文章ID");
 
         using var tran = db.AsTenant().UseTran();
         var result = await articleRepository.DeleteByIdAsync(id);
