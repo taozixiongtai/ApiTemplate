@@ -146,4 +146,26 @@ public class UserService(IBaseRepository<User> userRepo, JwtHelper jwtHelper) : 
         return jwtHelper.GenerateToken(user.Username);
     }
 }
+
+## 6. 数据库事务处理 (Database Transactions)
+
+**在 Service 层处理事务时，不要手动编写 `try/catch` 并调用 `BeginTranAsync` / `RollbackTranAsync`**。
+
+对于注入的 `ISqlSugarClient`，应使用 SqlSugar 提供的 `UseTran()` 语法糖。利用 `using` 声明，事务会在作用域结束或发生未捕获异常时自动回滚，代码更加简洁优雅。注意，如果依赖注入的类型为 `ISqlSugarClient`，需先通过 `AsTenant()` 转换后再调用。
+
+### 使用示例：
+```csharp
+public async Task DeleteArticleAsync(int id)
+{
+    // 1. 开启事务 (使用 using 声明，发生异常或提早 return 时自动触发 Rollback)
+    using var tran = db.AsTenant().UseTran();
+    
+    var result = await articleRepository.DeleteByIdAsync(id);
+    Check.IsTrue(result, "文章不存在或删除失败");
+
+    await relationRepository.DeleteAsync(x => x.ArticleId == id);
+
+    // 2. 只有代码执行到这里时，才会真正提交事务
+    tran.CommitTran();
+}
 ```

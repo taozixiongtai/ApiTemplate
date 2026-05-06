@@ -88,21 +88,13 @@ public class CategoryService(
     {
         Check.IsTrue(id > 0, "无效的分类ID");
 
-        await db.Ado.BeginTranAsync();
-        try
-        {
-            var result = await categoryRepository.DeleteByIdAsync(id);
-            Check.IsTrue(result, "分类不存在或删除失败");
+        using var tran = db.AsTenant().UseTran();
+        var result = await categoryRepository.DeleteByIdAsync(id);
+        Check.IsTrue(result, "分类不存在或删除失败");
 
-            await relationRepository.DeleteAsync(x => x.CategoryId == id);
+        await relationRepository.DeleteAsync(x => x.CategoryId == id);
             
-            await db.Ado.CommitTranAsync();
-        }
-        catch (Exception)
-        {
-            await db.Ado.RollbackTranAsync();
-            throw;
-        }
+        tran.CommitTran();
     }
 
     private static CategoryDto MapToDto(Category category)

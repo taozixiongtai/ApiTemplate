@@ -93,30 +93,22 @@ public class ArticleService(
             UpdatedAt = DateTime.UtcNow
         };
 
-        await db.Ado.BeginTranAsync();
-        try
-        {
-            var id = await articleRepository.InsertReturnIdentityAsync(article);
+        using var tran = db.AsTenant().UseTran();
+        var id = await articleRepository.InsertReturnIdentityAsync(article);
 
-            if (dto.CategoryIds != null && dto.CategoryIds.Any())
+        if (dto.CategoryIds != null && dto.CategoryIds.Any())
+        {
+            var relations = dto.CategoryIds.Select(cid => new ArticleCategoryRelation
             {
-                var relations = dto.CategoryIds.Select(cid => new ArticleCategoryRelation
-                {
-                    ArticleId = id,
-                    CategoryId = cid
-                }).ToList();
-                await relationRepository.InsertRangeAsync(relations);
-            }
-
-            await db.Ado.CommitTranAsync();
-
-            return await GetArticleByIdAsync(id);
+                ArticleId = id,
+                CategoryId = cid
+            }).ToList();
+            await relationRepository.InsertRangeAsync(relations);
         }
-        catch (Exception)
-        {
-            await db.Ado.RollbackTranAsync();
-            throw;
-        }
+
+        tran.CommitTran();
+
+        return await GetArticleByIdAsync(id);
     }
 
     /// <summary>
@@ -131,7 +123,7 @@ public class ArticleService(
         Check.IsTrue(dto.Title.Length <= 200, "文章标题不能超过200个字符");
         Check.NotEmpty(dto.Content, "文章内容不能为空");
 
-        await db.Ado.BeginTranAsync();
+        using var tran = db.AsTenant().UseTran();
         var article = await articleRepository.GetByIdAsync(id);
         Check.NotNull(article, "文章不存在或更新失败");
 
@@ -152,7 +144,7 @@ public class ArticleService(
             await relationRepository.InsertRangeAsync(relations);
         }
 
-        await db.Ado.CommitTranAsync();
+        tran.CommitTran();
     }
 
     /// <summary>
@@ -163,21 +155,13 @@ public class ArticleService(
     {
         Check.IsTrue(id > 0, "无效的文章ID");
 
-        await db.Ado.BeginTranAsync();
-        try
-        {
-            var result = await articleRepository.DeleteByIdAsync(id);
-            Check.IsTrue(result, "文章不存在或删除失败");
+        using var tran = db.AsTenant().UseTran();
+        var result = await articleRepository.DeleteByIdAsync(id);
+        Check.IsTrue(result, "文章不存在或删除失败");
 
-            await relationRepository.DeleteAsync(x => x.ArticleId == id);
+        await relationRepository.DeleteAsync(x => x.ArticleId == id);
 
-            await db.Ado.CommitTranAsync();
-        }
-        catch (Exception)
-        {
-            await db.Ado.RollbackTranAsync();
-            throw;
-        }
+        tran.CommitTran();
     }
 
     private static ArticleDto MapToDto(Article article)
