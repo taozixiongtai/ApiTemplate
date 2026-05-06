@@ -4,7 +4,6 @@ using ApiTemplate.Application.Mapper;
 using ApiTemplate.Domain.Dto;
 using ApiTemplate.Domain.Models;
 using ApiTemplate.Infrastructure.IOC;
-using Mapster;
 using SqlSugar;
 using Check = ApiTemplate.Infrastructure.Check.Check;
 
@@ -19,6 +18,8 @@ public class ArticleService(
     IBaseRepository<ArticleCategoryRelation> relationRepository,
     ISqlSugarClient db) : IArticleService
 {
+    private readonly ArticleMapper _mapper = new();
+
     /// <summary>
     /// 获取文章分页列表
     /// </summary>
@@ -53,7 +54,7 @@ public class ArticleService(
 
         return new PagedResult<ArticleDto>
         {
-            Items = list.ProjectToDto(),
+            Items = _mapper.ToDtoList(list),
             TotalCount = totalCount,
             Page = request.Page,
             PageSize = request.PageSize
@@ -73,7 +74,7 @@ public class ArticleService(
 
         Check.NotNull(article, "文章不存在");
 
-        return article.MapToDto();
+        return _mapper.ToDto(article);
     }
 
     /// <summary>
@@ -83,13 +84,9 @@ public class ArticleService(
     /// <returns>创建后的文章信息</returns>
     public async Task<ArticleDto> CreateArticleAsync(ArticleRequest dto)
     {
-        var article = new Article
-        {
-            Title = dto.Title,
-            Content = dto.Content,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var article = _mapper.ToEntity(dto);
+        article.CreatedAt = DateTime.UtcNow;
+        article.UpdatedAt = DateTime.UtcNow;
 
         using var tran = db.AsTenant().UseTran();
         var id = await articleRepository.InsertReturnIdentityAsync(article);
@@ -121,8 +118,7 @@ public class ArticleService(
         var article = await articleRepository.GetByIdAsync(id);
         Check.NotNull(article, "文章不存在或更新失败");
 
-        article.Title = dto.Title;
-        article.Content = dto.Content;
+        _mapper.UpdateEntity(dto, article);
         article.UpdatedAt = DateTime.UtcNow;
 
         await articleRepository.UpdateAsync(article);

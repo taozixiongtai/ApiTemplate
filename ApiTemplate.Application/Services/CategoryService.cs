@@ -4,7 +4,6 @@ using ApiTemplate.Application.Mapper;
 using ApiTemplate.Domain.Models;
 using ApiTemplate.Infrastructure.Check;
 using ApiTemplate.Infrastructure.IOC;
-using Mapster;
 using SqlSugar;
 using Check = ApiTemplate.Infrastructure.Check.Check;
 
@@ -19,6 +18,8 @@ public class CategoryService(
     IBaseRepository<ArticleCategoryRelation> relationRepository,
     ISqlSugarClient db) : ICategoryService
 {
+    private readonly CategoryMapper _mapper = new();
+
     /// <summary>
     /// 获取所有分类
     /// </summary>
@@ -26,7 +27,7 @@ public class CategoryService(
     public async Task<List<CategoryDto>> GetAllCategoriesAsync()
     {
         var categories = await categoryRepository.GetListAsync();
-        return categories.ProjectToDto();
+        return _mapper.ToDtoList(categories);
     }
 
     /// <summary>
@@ -38,7 +39,7 @@ public class CategoryService(
     {
         var category = await categoryRepository.GetByIdAsync(id);
         Check.NotNull(category, "分类不存在");
-        return category.MapToDto();
+        return _mapper.ToDto(category);
     }
 
     /// <summary>
@@ -48,12 +49,9 @@ public class CategoryService(
     /// <returns>创建后的分类信息</returns>
     public async Task<CategoryDto> CreateCategoryAsync(CategoryRequest dto)
     {
-        var category = new Category
-        {
-            Name = dto.Name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var category = _mapper.ToEntity(dto);
+        category.CreatedAt = DateTime.UtcNow;
+        category.UpdatedAt = DateTime.UtcNow;
         
         var id = await categoryRepository.InsertReturnIdentityAsync(category);
         return await GetCategoryByIdAsync(id);
@@ -70,7 +68,7 @@ public class CategoryService(
         var category = await categoryRepository.GetByIdAsync(id);
         Check.NotNull(category, "分类不存在或更新失败");
 
-        category.Name = dto.Name;
+        _mapper.UpdateEntity(dto, category);
         category.UpdatedAt = DateTime.UtcNow;
 
         await categoryRepository.UpdateAsync(category);

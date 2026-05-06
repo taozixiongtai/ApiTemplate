@@ -172,46 +172,77 @@ public async Task DeleteArticleAsync(int id)
 
 ## 7. 对象映射 (Object Mapping)
 
-**不要手动编写转换方法，也不要在业务代码中直接调用 `.Adapt<T>()`**。
+**不要手动编写转换方法**。
 
-框架集成了 `Mapster` 及 `MapsterExtensions.Generator`。请在 `Mapper` 文件夹中定义带有 `[Mapper]` 特性的接口，由源代码生成器在编译时自动生成对应的扩展方法。在 Service 中直接调用这些生成的扩展方法（如 `.MapToDto()` 或 `.ProjectToDto()`）。
+框架集成了 `Mapperly` (`Riok.Mapperly`) 作为对象映射框架。它是一个纯粹的 Source Generator，在编译时生成映射代码，性能极高。
+请在 `Mapper` 文件夹中按领域实体定义带有 `[Mapper]` 特性的 `partial class`。在 Service 中直接实例化对应的 Mapper 进行转换。
 
 ### 使用示例：
 
-1. 在 `Mapper` 目录中定义接口：
+1. 在 `Mapper` 目录中按实体定义分部类 (partial class)：
 ```csharp
 using ApiTemplate.Application.Dto;
 using ApiTemplate.Domain.Models;
-using Mapster;
+using Riok.Mapperly.Abstractions;
 
 namespace ApiTemplate.Application.Mapper;
 
 [Mapper]
-public interface IApplicationMapper
+public partial class CategoryMapper
 {
-    CategoryDto MapToDto(Category category);
-    List<CategoryDto> ProjectToDto(List<Category> categories);
+    // 单对象
+    public partial CategoryDto ToDto(Category entity);
+
+    // 集合（必须显式写）
+    public partial List<CategoryDto> ToDtoList(List<Category> entities);
+
+    // 反向
+    public partial Category ToEntity(CategoryRequest dto);
+
+    // 更新（非常重要）
+    public partial void UpdateEntity(CategoryRequest dto, Category entity);
 }
 ```
 
-2. 在业务服务中使用生成的扩展方法：
+2. 在业务服务中实例化并调用 Mapper：
 ```csharp
-using ApiTemplate.Application.Mapper; // 引入生成的扩展方法所在的命名空间
+using ApiTemplate.Application.Mapper; 
 
-public async Task<CategoryDto> GetCategoryByIdAsync(int id)
+[RegisterService(ServiceLifetimeType.Scoped)]
+public class CategoryService(
+    IBaseRepository<Category> categoryRepository) : ICategoryService
 {
-    var category = await categoryRepository.GetByIdAsync(id);
-    Check.NotNull(category, "分类不存在");
-    
-    // 使用生成的扩展方法
-    return category.MapToDto();
-}
+    // 直接实例化生成的分部类
+    private readonly CategoryMapper _mapper = new();
 
-public async Task<List<CategoryDto>> GetAllCategoriesAsync()
-{
-    var categories = await categoryRepository.GetListAsync();
-    
-    // 集合类型也可以调用对应的扩展方法
-    return categories.ProjectToDto();
+    public async Task<CategoryDto> GetCategoryByIdAsync(int id)
+    {
+        var category = await categoryRepository.GetByIdAsync(id);
+        Check.NotNull(category, "分类不存在");
+        
+        // DTO 转换
+        return _mapper.ToDto(category);
+    }
+
+    public async Task<CategoryDto> CreateCategoryAsync(CategoryRequest dto)
+    {
+        // 实体创建转换
+        var category = _mapper.ToEntity(dto);
+        category.CreatedAt = DateTime.UtcNow;
+        
+        var id = await categoryRepository.InsertReturnIdentityAsync(category);
+        return await GetCategoryByIdAsync(id);
+    }
+
+    public async Task UpdateCategoryAsync(int id, CategoryRequest dto)
+    {
+        var category = await categoryRepository.GetByIdAsync(id);
+        
+        // 实体更新转换
+        _mapper.UpdateEntity(dto, category);
+        category.UpdatedAt = DateTime.UtcNow;
+
+        await categoryRepository.UpdateAsync(category);
+    }
 }
 ```
