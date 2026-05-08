@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ApiTemplate.Application.Dto;
 
-public class ArticleRequest
+public record ArticleRequest
 {
     [Required(ErrorMessage = "文章标题不能为空")]
     [MaxLength(200, ErrorMessage = "文章标题不能超过200个字符")]

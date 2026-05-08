@@ -141,11 +141,12 @@ public class UserService(IBaseRepository<User> userRepo, JwtHelper jwtHelper) : 
 {
     public async Task<string> LoginAsync(LoginRequest req)
     {
-        // 直接使用主构造函数中的 userRepo 和 jwtHelper 变量
+        // 直接使用主构造函数中的 userRepo 和 jwtHelper 变量 
         var user = await userRepo.GetFirstAsync(u => u.Username == req.Username);
         return jwtHelper.GenerateToken(user.Username);
     }
 }
+
 
 ## 6. 数据库事务处理 (Database Transactions)
 

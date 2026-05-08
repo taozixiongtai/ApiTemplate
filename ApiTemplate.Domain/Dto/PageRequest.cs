@@ -3,7 +3,7 @@ namespace ApiTemplate.Domain.Dto;
 /// <summary>
 /// 分页请求基类
 /// </summary>
-public class PageRequest
+public record PageRequest
 {
     private int _page = 1;
     private int _pageSize = 10;

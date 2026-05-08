@@ -5,7 +5,7 @@ namespace ApiTemplate.Application.Dto;
 /// <summary>
 /// 文章查询请求对象
 /// </summary>
-public class ArticleQueryRequest : PageRequest
+public record ArticleQueryRequest : PageRequest
 {
     /// <summary>
     /// 分类ID
