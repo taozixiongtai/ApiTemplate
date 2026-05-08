@@ -33,6 +33,26 @@ public static class DbInitSetup
         if (entityTypes.Length > 0)
         {
             sqlSugar.CodeFirst.InitTables(entityTypes);
+
+            // 3. 插入种子数据
+            logger.LogInformation("正在插入种子数据...");
+            
+            using var tran = sqlSugar.AsTenant().UseTran();
+            try
+            {
+                sqlSugar.Insertable(SeedData.GetSeedUsers()).ExecuteCommand();
+                sqlSugar.Insertable(SeedData.GetSeedCategories()).ExecuteCommand();
+                sqlSugar.Insertable(SeedData.GetSeedArticles()).ExecuteCommand();
+                sqlSugar.Insertable(SeedData.GetSeedArticleCategoryRelations()).ExecuteCommand();
+                
+                tran.CommitTran();
+                logger.LogInformation("种子数据插入成功！");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "插入种子数据失败");
+                throw;
+            }
         }
 
         logger.LogInformation("✅ 数据库及表结构初始化成功。");

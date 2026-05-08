@@ -12,7 +12,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = 500;
+        context.Response.StatusCode = StatusCodes.Status200OK; // 前端要求发生业务或系统错误时 Http 状态码始终返回 200，错误信息在 Body 中体现
 
         var message = exception is ApiException apiEx ? apiEx.Message : "服务器内部错误";
         var response = ApiResult.Fail(message);

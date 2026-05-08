@@ -2,7 +2,6 @@ using ApiTemplate.Application.Dto;
 using ApiTemplate.Application.IServices;
 using ApiTemplate.Application.Mapper;
 using ApiTemplate.Domain.Models;
-using ApiTemplate.Infrastructure.Check;
 using ApiTemplate.Infrastructure.IOC;
 using SqlSugar;
 using Check = ApiTemplate.Infrastructure.Check.Check;
@@ -52,7 +51,7 @@ public class CategoryService(
         var category = _mapper.ToEntity(dto);
         category.CreatedAt = DateTime.UtcNow;
         category.UpdatedAt = DateTime.UtcNow;
-        
+
         var id = await categoryRepository.InsertReturnIdentityAsync(category);
         return await GetCategoryByIdAsync(id);
     }
@@ -86,7 +85,7 @@ public class CategoryService(
         Check.IsTrue(result, "分类不存在或删除失败");
 
         await relationRepository.DeleteAsync(x => x.CategoryId == id);
-            
+
         tran.CommitTran();
     }
 }

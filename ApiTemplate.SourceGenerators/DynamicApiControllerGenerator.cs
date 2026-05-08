@@ -80,6 +80,22 @@ public class DynamicApiControllerGenerator : IIncrementalGenerator
         sb.AppendLine();
         sb.AppendLine("namespace ApiTemplate.Controllers.Generated");
         sb.AppendLine("{");
+
+        // 透传 Interface 级别的 Attribute (例如 [Authorize] 但其实 C# 默认不让加在接口上，只能自定义)
+        var interfaceAttrs = ifaceSymbol.GetAttributes()
+            .Where(a => ShouldPassThrough(a.AttributeClass?.ToDisplayString()));
+        foreach (var attr in interfaceAttrs)
+        {
+            var syntaxRef = attr.ApplicationSyntaxReference;
+            if (syntaxRef != null)
+            {
+                string attrText = syntaxRef.GetSyntax().ToFullString().Trim();
+                sb.AppendLine($"    {attrText}");
+            }
+        }
+
+        // 默认所有生成的 Controller 加上 [Authorize]，需要在方法级别公开的用 [AllowAnonymous]
+        sb.AppendLine($"    [Authorize]");
         sb.AppendLine($"    [ApiController]");
         sb.AppendLine($"    [Route(\"{routePrefix}\")]");
         sb.AppendLine($"    public class {controllerName} : ControllerBase");
